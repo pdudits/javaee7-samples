@@ -47,8 +47,8 @@
             Application Server versions
             (these are downloaded and installed in these versions by Maven for the CI profiles)
          -->
-        <payara.version>4.1.2.181</payara.version>
-        <payara.micro.version>5.182</payara.micro.version>
+        <payara.version>5.191</payara.version>
+        <payara.micro.version>5.191</payara.micro.version>
         <glassfish.client.version>5.0</glassfish.client.version> <!-- For remote EJB for Payara and Glassfish -->
         <glassfish.version>4.1.1</glassfish.version>
         <liberty.version>16.0.0.4</liberty.version>
@@ -555,22 +555,20 @@
             </properties>
 
             <dependencies>
-                <!-- Java EE based client dependencies to contact a server via WebSocket or REST -->
-                <dependency>
-                    <groupId>fish.payara.arquillian</groupId>
-                    <artifactId>payara-client-ee7</artifactId>
-                    <exclusions>
-                        <exclusion>
-                            <groupId>org.glassfish.grizzly</groupId>
-                            <artifactId>grizzly-http-server</artifactId>
-                        </exclusion>
-                    </exclusions>
-                </dependency>
-                
                 <dependency>
                     <groupId>fish.payara.extras</groupId>
                     <artifactId>payara-embedded-all</artifactId>
                     <version>${payara.version}</version>
+                    <scope>test</scope>
+                </dependency>
+
+                <!-- Payara 5 is Java EE 8 compliant. When running embedded,
+                     it needs to have compatible Java EE API on the classpath.
+                -->
+                <dependency>
+                    <groupId>javax</groupId>
+                    <artifactId>javaee-api</artifactId>
+                    <version>8.0</version>
                     <scope>provided</scope>
                 </dependency>
 
@@ -592,6 +590,14 @@
                         <filtering>true</filtering>
                     </testResource>
                 </testResources>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                           <trimStackTrace>false</trimStackTrace>
+                        </configuration>
+                    </plugin>
+                </plugins>
             </build>
         </profile>
 
