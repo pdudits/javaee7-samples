@@ -2,6 +2,7 @@ package org.javaee7.batch.samples.scheduling;
 
 import static com.jayway.awaitility.Awaitility.await;
 import static com.jayway.awaitility.Duration.FIVE_HUNDRED_MILLISECONDS;
+import static com.jayway.awaitility.Duration.ONE_HUNDRED_MILLISECONDS;
 import static com.jayway.awaitility.Duration.ONE_MINUTE;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static javax.batch.runtime.BatchRuntime.getJobOperator;
@@ -84,14 +85,25 @@ public class TimerScheduleBatchTest {
         countDownLatch.await(90, SECONDS);
 
         assertEquals(0, countDownLatch.getCount());
-        assertEquals(3, MyTimerScheduleAlternative.executedBatchs.size());
+        await().atMost(ONE_MINUTE)
+            .with().pollInterval(ONE_HUNDRED_MILLISECONDS)
+            .until(new Callable<Boolean>() {
+                @Override
+                public Boolean call() throws Exception {
+                    return MyTimerScheduleAlternative.executedBatchs.size() == 3;
+                }
+            });
         
         final JobExecution lastExecution = getJobOperator().getJobExecution(MyTimerScheduleAlternative.executedBatchs.get(2));
         
         await().atMost(ONE_MINUTE)
-               .with().pollInterval(FIVE_HUNDRED_MILLISECONDS)
-               .until(                                                                                                                                                                                      new Callable<Boolean>() { @Override public Boolean call() throws Exception {
-                   return lastExecution.getBatchStatus() != STARTED;                                                                                                                                        }}
+                .with().pollInterval(FIVE_HUNDRED_MILLISECONDS)
+                .until(new Callable<Boolean>() {
+                    @Override
+                    public Boolean call() throws Exception {
+                        return lastExecution.getBatchStatus() != STARTED;
+                    }
+                }
                 );
 
         for (Long executedBatch : MyTimerScheduleAlternative.executedBatchs) {
