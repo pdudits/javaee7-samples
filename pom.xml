@@ -562,16 +562,6 @@
                     <scope>test</scope>
                 </dependency>
 
-                <!-- Payara 5 is Java EE 8 compliant. When running embedded,
-                     it needs to have compatible Java EE API on the classpath.
-                -->
-                <dependency>
-                    <groupId>javax</groupId>
-                    <artifactId>javaee-api</artifactId>
-                    <version>8.0</version>
-                    <scope>provided</scope>
-                </dependency>
-
                 <dependency>
                     <groupId>org.jboss.arquillian.container</groupId>
                     <artifactId>arquillian-glassfish-embedded-3.1</artifactId>
@@ -595,6 +585,18 @@
                         <artifactId>maven-surefire-plugin</artifactId>
                         <configuration>
                            <trimStackTrace>false</trimStackTrace>
+                           <!-- java ee apis are part of embedded bundle, and having
+                                those APIs multiple times on the classpath causes
+                                trouble -->
+                           <classpathDependencyExcludes>
+                               <classpathDependencyExclude>javax:javaee-api</classpathDependencyExclude>
+                               <classpathDependencyExclude>javax.enterprise:cdi-api</classpathDependencyExclude>
+                               <classpathDependencyExclude>javax.inject:javax.inject</classpathDependencyExclude>
+                               <classpathDependencyExclude>javax.servlet:servlet-api</classpathDependencyExclude>
+                               <classpathDependencyExclude>commons-logging:commons-logging</classpathDependencyExclude>
+                               <classpathDependencyExclude>javax.annotation:jsr250-api</classpathDependencyExclude>
+                               <classpathDependencyExclude>xalan:xalan</classpathDependencyExclude>
+                           </classpathDependencyExcludes>
                         </configuration>
                     </plugin>
                 </plugins>
