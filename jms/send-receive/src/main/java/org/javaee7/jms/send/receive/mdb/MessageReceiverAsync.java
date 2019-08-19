@@ -37,12 +37,17 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
+// Portions Copyright (c) 2019 Payara Foundation and/or its affiliates. All rights reserved.
+
 package org.javaee7.jms.send.receive.mdb;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.annotation.PostConstruct;
 import javax.ejb.ActivationConfigProperty;
 import javax.ejb.MessageDriven;
+import javax.inject.Inject;
+import javax.interceptor.Interceptors;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageListener;
@@ -60,6 +65,7 @@ import org.javaee7.jms.send.receive.Resources;
             propertyValue = Resources.ASYNC_QUEUE),
     @ActivationConfigProperty(propertyName = "destinationType",
             propertyValue = "javax.jms.Queue"),})
+@Interceptors(ReceiverInterceptor.class)
 public class MessageReceiverAsync implements MessageListener {
 
     @Override

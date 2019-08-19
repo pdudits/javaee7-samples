@@ -53,6 +53,14 @@ public class ReceptionSynchronizer {
 
     void registerInvocation(Method m) {
         CountDownLatch latch = null;
+        while (m.getDeclaringClass().isSynthetic()) {
+            Class<?> parent = m.getDeclaringClass().getSuperclass();
+            try {
+                m = parent.getDeclaredMethod(m.getName(), m.getParameterTypes());
+            } catch (NoSuchMethodException e) {
+                throw new IllegalArgumentException("I did expect to find overriden method "+m.toGenericString()+" in its parent class");
+            }
+        }
         synchronized (barrier) {
             if (barrier.containsKey(m)) {
                 latch = barrier.get(m);

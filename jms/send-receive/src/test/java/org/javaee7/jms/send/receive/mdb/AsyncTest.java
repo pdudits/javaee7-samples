@@ -14,6 +14,8 @@ import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.junit.runner.RunWith;
 
+import static org.junit.Assert.assertEquals;
+
 /**
  *
  * @author Patrik Dudits
@@ -23,6 +25,9 @@ public class AsyncTest {
 
     @EJB
     MessageSenderAsync asyncSender;
+
+    @EJB
+    ReceiverLogger logger;
     
     private final int messageReceiveTimeoutInMillis = 10000;
 
@@ -31,6 +36,8 @@ public class AsyncTest {
         asyncSender.sendMessage("Fire!");
         ReceptionSynchronizer.waitFor(MessageReceiverAsync.class, "onMessage" , messageReceiveTimeoutInMillis);
         // unless we timed out, the test passes
+        assertEquals("AroundConstruct should only be intercepted once", 1, logger.getConstructed());
+        assertEquals("AroundInvoke should only be intercepted once", 1, logger.getReceived());
     }
 
     @Deployment
@@ -40,6 +47,8 @@ public class AsyncTest {
             .addClass(Resources.class)
             .addClass(MessageReceiverAsync.class)
             .addClass(ReceptionSynchronizer.class)
+            .addClass(ReceiverInterceptor.class)
+            .addClass(ReceiverLogger.class)
             .addAsWebInfResource(new File("src/test/resources/WEB-INF/ejb-jar.xml"));
     }
 
